@@ -1,0 +1,40 @@
+#!/bin/bash
+
+PROTECTED=no
+ALLOWED=yes
+
+REMOTE_NAME="$1"
+REMOTE_URL="$2"
+
+for remote_pattern in $(git config protect.remotes); do
+	if [[ "$REMOTE_NAME" =~ "$remote_pattern" ]]; then
+		echo "The remote \"$REMOTE_NAME\" is protected."
+		PROTECTED=yes
+		break
+	fi
+done
+
+if test $PROTECTED == yes; then
+	while true; do
+		read -p "Are you sure you would like to push? [yes, no (default)]? " -r </dev/tty 
+			case "$REPLY" in
+			yes|ye|y)
+				ALLOW=yes
+				break
+				;;
+			q|quit|no|n|"")
+				ALLOW=no
+				break
+				;;
+			*)
+				echo "Please answer with yes or no."
+				;;
+		esac
+	done
+fi
+
+if test $ALLOW == no; then
+	echo "Push cancelled."
+	exit 1
+fi
+
